@@ -1,24 +1,36 @@
 import React from "react";
 import { useParams } from "react-router";
-import { products } from "../data/product";
 import RateStar from "../components/RateStar";
+import useProductStore from "../store/useProductStore";
+import useCartStore from "../store/useCartStore";
+import AddToCartBtn from "../components/AddToCartBtn";
 
 const ProductDetail = () => {
+  const { products } = useProductStore();
   const { productId } = useParams();
+  const { carts,addToCart } = useCartStore();
   const currentProduct = products.find((pd) => pd.id == productId);
 
   const currentRate = currentProduct.rating.rate.toFixed(0);
   let length = 5;
   const numbers = Array.from({ length }, (_, i) => i + 1);
 
-  console.log(currentProduct);
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    const newCart = {
+      id: Date.now(),
+      productId: currentProduct.id,
+      quantity: 1,
+    };
+    addToCart(newCart);
+  };
   return (
-    <div className=" w-[60%] mx-auto flex justify-center flex-col h-full ">
-      <div className=" flex gap-20 border border-gray-100 shadow p-15 rounded">
-        <div className=" w-1/2 flex justify-end">
+    <div className=" w-full lg:w-[60%] mx-0 lg:mx-auto flex justify-start lg:justify-center flex-col h-full ">
+      <div className=" flex gap-3 flex-col md:flex-row  md:gap-20 border border-gray-100 shadow p-15 rounded">
+        <div className=" w-full md:w-1/2 flex justify-start md:justify-end">
           <img src={currentProduct.image} alt="" className=" w-64" />
         </div>
-        <div className=" w-1/2 flex flex-col gap-5">
+        <div className=" w-full md:w-1/2 flex flex-col gap-5">
           <h1 className=" text-2xl font-bold pt-5">{currentProduct.title}</h1>
           <p className=" bg-gray-200 p-2 rounded shadow-sm text-gray-800">
             {currentProduct.category}
@@ -33,9 +45,13 @@ const ProductDetail = () => {
           </div>
           <div className=" flex items-center justify-between gap-2">
             <p className=" text-lg font-bold">${currentProduct.price}</p>
-            <button className=" cursor-pointer shadow-sm border border-indigo-600 text-indigo-600 py-1 px-3 rounded-sm hover:bg-indigo-600 hover:text-white">
-              Add to Cart
-            </button>
+            <AddToCartBtn
+              handleAddToCart={handleAddToCart}
+              isAdded={carts.some(
+                (cart) => cart.productId === currentProduct.id,
+              )}
+              productId={currentProduct.id}
+            />
           </div>
         </div>
       </div>

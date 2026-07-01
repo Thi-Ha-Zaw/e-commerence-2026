@@ -1,6 +1,8 @@
 import React from "react";
 import RateStar from "./RateStar";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import useCartStore from "../store/useCartStore";
+import AddToCartBtn from "./AddToCartBtn";
 
 const ProductCard = ({
   product: {
@@ -17,8 +19,30 @@ const ProductCard = ({
   let length = 5;
   const numbers = Array.from({ length }, (_, i) => i + 1);
 
+
+  const {addToCart,carts} = useCartStore();
+
+  const isAdded = carts.some((cart) => cart.productId === id);
+
+
+  const navigate = useNavigate();
+
+  const handleOpenDetail = () => {
+    navigate(`/product-detail/${id}`);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    const newCart = {
+      id: Date.now(),
+      productId: id,
+      quantity: 1,
+    };
+    addToCart(newCart);
+  };
+
   return (
-    <Link to={`/product-detail/${id}`}>
+    <div onClick={handleOpenDetail}>
       <div className=" cursor-pointer shadow-sm border-gray-50 border rounded-sm p-5 flex flex-col gap-4 h-full">
         <img src={image} alt="" className=" h-28 object-contain" />
         <p className=" text-gray-900 text-sm text-center truncate">{title}</p>
@@ -29,12 +53,10 @@ const ProductCard = ({
         </div>
         <div className=" flex items-center justify-between gap-2 mt-auto">
           <p className=" text-lg font-bold">${price}</p>
-          <button className=" shadow-sm border border-indigo-600 text-indigo-600 py-1 px-3 rounded-sm hover:bg-indigo-600 hover:text-white">
-            Add to Cart
-          </button>
+          <AddToCartBtn handleAddToCart={handleAddToCart} isAdded={isAdded} productId={id} />
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
